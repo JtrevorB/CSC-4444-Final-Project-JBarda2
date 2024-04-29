@@ -1,0 +1,92 @@
+def check_winner(board, player):
+    combinations = [
+        (0, 1, 2), (3, 4, 5), (6, 7, 8),  # Rows
+        (0, 3, 6), (1, 4, 7), (2, 5, 8),  # Columns
+        (0, 4, 8), (2, 4, 6)  # Diagonals
+    ]
+    return any(board[a] == board[b] == board[c] == player for a, b, c in combinations)
+def minimax(board, depth, isMaximizing):
+    if check_winner(board, 'x'):               #Define scores
+        return -10 + depth  
+    if check_winner(board, 'o'):
+        return 10 - depth  
+
+    if all(isinstance(x, str) for x in board):  # Check if all spots are filled
+        return 0
+
+    if isMaximizing:                         #finds best score for AI
+        bestScore = -float('inf')
+        for i in range(9):
+            if isinstance(board[i], int):  # Check for empty spots
+                board[i] = 'o'
+                score = minimax(board, depth + 1, False)
+                board[i] = i  # Undo move
+                bestScore = max(score, bestScore)
+        return bestScore
+    else:
+        bestScore = float('inf')              #Finds best score for player
+        for i in range(9):
+            if isinstance(board[i], int):
+                board[i] = 'x'
+                score = minimax(board, depth + 1, True)
+                board[i] = i  # Undo move
+                bestScore = min(score, bestScore)
+        return bestScore
+
+
+def find_best_move(board):
+    bestScore = -float('inf')
+    move = -1
+    for i in range(9):
+        if isinstance(board[i], int):
+            board[i] = 'o'
+            score = minimax(board, 0, False)
+            board[i] = i
+            if score > bestScore:
+                bestScore = score
+                move = i
+    return move
+
+Tic = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+G = 0
+T = 0
+m = 0
+
+while T < 1:                                 #Print Board
+    print(Tic[0], "|", Tic[1], "|", Tic[2])
+    print("----------")
+    print(Tic[3], "|", Tic[4], "|", Tic[5])
+    print("----------")
+    print(Tic[6], "|", Tic[7], "|", Tic[8])
+
+    if G == 0:                               #Player (x)'s Move
+        i = input("Type 0-8 to place x ")
+        i = int(i)
+        Tic[i] = "x"
+        m += 1
+
+    if G == 0 and not any(check_winner(Tic, player) for player in ['x', 'o']) and m<9:      #AI (o's) move
+        i = find_best_move(Tic)
+        Tic[i] = 'o'
+        m += 1
+        print("AI placed 'o' in position", i)
+
+    for player in ['x', 'o']:                    # checks for winner
+        if check_winner(Tic, player):
+            G = 1 if player == 'x' else 2
+            break
+
+    if m >= 9 or G > 0:                            #Prints board at the end of the game
+        print(Tic[0], "|", Tic[1], "|", Tic[2])
+        print("----------")
+        print(Tic[3], "|", Tic[4], "|", Tic[5])
+        print("----------")
+        print(Tic[6], "|", Tic[7], "|", Tic[8])
+        T = 1
+
+if G == 1:                                        # displays message at the end of the game.
+    print("x wins")
+elif G == 2:
+    print("o wins")
+else:
+    print("Tied Game")
